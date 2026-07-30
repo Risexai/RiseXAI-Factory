@@ -1,0 +1,49 @@
+name: RiseXAI Content Factory
+
+on:
+  workflow_dispatch:
+    inputs:
+      idea:
+        description: "Video Idea"
+        required: true
+        type: string
+      duration:
+        description: "Video Duration"
+        required: true
+        default: "30"
+        type: choice
+        options:
+          - "15"
+          - "30"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install packages
+      run: |
+        pip install -r requirements.txt
+
+    - name: Generate Content
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python scripts/main.py \
+        --idea "${{ github.event.inputs.idea }}" \
+        --duration "${{ github.event.inputs.duration }}"
+
+    - name: Upload Result
+      uses: actions/upload-artifact@v4
+      with:
+        name: RiseXAI-Output
+        path: output/
